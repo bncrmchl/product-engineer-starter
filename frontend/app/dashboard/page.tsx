@@ -1,31 +1,64 @@
 "use client";
 
-import GuidelinesUpload from "@/components/guidelines-upload";
-import MedicalRecordUpload from "@/components/medical-record-upload";
-import { useRouter } from "next/navigation";
 import React, { useContext } from "react";
+import { useRouter } from "next/navigation";
 import { DashboardContext } from "@/context/dashboard-context";
-
-export const revalidate = 0;
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import FileUploadButton from "@/components/generic-file-upload";
 
 export default function DashboardRoot() {
 	const router = useRouter();
-	const { guidelinesFile, medicalRecord } = useContext(DashboardContext);
+	const { guidelinesFile, medicalRecord, setGuidelinesFile, setMedicalRecord } = useContext(DashboardContext);
 	const CASE_ID = "case_891a_6fbl_87d1_4326";
-    const isContinueButtonDisabled = !guidelinesFile || !medicalRecord;
+	const isContinueButtonDisabled = !guidelinesFile || !medicalRecord;
+
 	const handleContinue = () => {
-		router.push(`/dashboard/case/${CASE_ID}`)
+		router.push(`/dashboard/case/${CASE_ID}`);
 	}
 
+	const notify = () => toast.error("Please upload the Medical Record first!");
+
+	const guidelinesFileUploadButtonProperties = {
+		file: guidelinesFile,
+		setFile: setGuidelinesFile,
+		fileUrl: "/assets/guidelines.pdf",
+		buttonColor: "bg-orange-500",
+		buttonText: "Simulate Guidelines"
+	};
+
+	const medicalRecordFileUploadButtonProperties = {
+		file: medicalRecord,
+		setFile: setMedicalRecord,
+		fileUrl: "/assets/medical-record.pdf",
+		buttonColor: "bg-blue-500",
+		buttonText: "Simulate Medical Record"
+	};
+
 	return (
+		<>
+		<ToastContainer />
 		<div className="w-full flex flex-col justify-center items-center h-screen">
 			<div className="w-full flex flex-row gap-2 items-center">
-				<MedicalRecordUpload />
-				<GuidelinesUpload />
+				<FileUploadButton
+					{...guidelinesFileUploadButtonProperties}
+					isEnabled={true}
+				/>
+				{guidelinesFile ? (
+					<FileUploadButton
+						{...medicalRecordFileUploadButtonProperties}
+						isEnabled={true}
+					/>
+				) : (
+					<FileUploadButton
+						{...medicalRecordFileUploadButtonProperties}
+						isEnabled={false}
+					/>
+				)}
 			</div>
 			<div className="w-full py-4 flex flex-row justify-center">
 				<button
-					className={`font-medium text-white py-2 px-4 rounded ${isContinueButtonDisabled ? "bg-gray-400" : "bg-green-600"}`}
+					className={`font-medium text-white py-2 px-4 rounded ${isContinueButtonDisabled ? "bg-gray-400" : "bg-green-600"} border-${isContinueButtonDisabled ? "bg-gray-400" : "bg-green-600"} border-2`}
 					onClick={handleContinue}
 					disabled={isContinueButtonDisabled}
 				>
@@ -33,5 +66,6 @@ export default function DashboardRoot() {
 				</button>
 			</div>
 		</div>
-	)
+		</>
+	);
 }
