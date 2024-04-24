@@ -31,7 +31,7 @@ export default function MedicalRecordUpload() {
                 {loading ? (
                     <div className="flex flex-row gap-1 items-center">
                         <FaSpinner className="animate-spin" />
-                        <span>Loading...</span>
+                        <span>Uploading...</span>
                     </div>
                 ) : medicalRecord === null ? (
                     <span>Simulate Medical Record Upload</span>
