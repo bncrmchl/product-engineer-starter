@@ -48,3 +48,6 @@ next-env.d.ts
 
 # Jetbrains IDE files
 .idea
+
+# pycache
+__pycache__
