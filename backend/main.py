@@ -42,7 +42,6 @@ async def create_case(case_creation_request: CaseCreationRequest):
 
 @app.get("/cases/{case_id}")
 async def get_case(case_id: uuid.UUID):
-    print(cases_db)
     return cases_db[case_id]
 
 
