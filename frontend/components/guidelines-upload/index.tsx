@@ -1,14 +1,21 @@
 "use client";
 
+import { useState } from 'react';
 import { useDashboard} from "@/context/dashboard-context";
 import classNames from "classnames";
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaSpinner } from "react-icons/fa";
+import { SIMULATED_FILE_UPLOAD_DURATION_MILLIS } from 'resources/constants';
 
 export default function GuidelinesUpload() {
     const { guidelinesFile, setGuidelinesFile } = useDashboard();
+    const [loading, setLoading] = useState(false);
 
     const handleClick = () => {
-        setGuidelinesFile({ url: "/assets/guidelines.pdf" });
+        setLoading(true);
+        setTimeout(() => {
+            setGuidelinesFile({ url: "/assets/guidelines.pdf" });
+            setLoading(false);
+        }, SIMULATED_FILE_UPLOAD_DURATION_MILLIS);
     }
 
     return(
@@ -16,12 +23,19 @@ export default function GuidelinesUpload() {
             <button
                 className={classNames(
                     "text-white font-medium py-2 px-4 rounded border border-2",
-                    guidelinesFile === null ? "bg-orange-500 border-orange-500" : "border-transparent text-green-600" 
+                    guidelinesFile === null ? "bg-orange-500 border-orange-500" : "border-transparent text-green-600"
                 )}
                 onClick={handleClick}
+                disabled={loading}
             >
-                {guidelinesFile === null && (<span>Simulate Guidelines Upload</span>)}
-                {guidelinesFile !== null && (
+                {loading ? (
+                        <div className="flex flex-row gap-1 items-center">
+                            <FaSpinner className="animate-spin" />
+                            <span>Loading...</span>
+                        </div>
+                ) : guidelinesFile === null ? (
+                    <span>Simulate Guidelines Upload</span>
+                ) : (
                     <span className="text-green-600 flex flex-row gap-1 items-center">
                         <FaCheck />
                         <span>Guidelines File Uploaded</span>
