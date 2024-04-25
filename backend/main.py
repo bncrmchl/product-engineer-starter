@@ -1,10 +1,11 @@
 import uuid
-
+from uuid import uuid4
+from http.client import HTTPException
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from entities.case import Case
 from entities.case_creation_request import CaseCreationRequest
-from uuid import uuid4
+from typing import List
 
 app = FastAPI()
 
@@ -34,17 +35,20 @@ async def root():
 
 
 @app.post("/cases")
-async def create_case(case_creation_request: CaseCreationRequest):
+async def create_case(case_creation_request: CaseCreationRequest) -> uuid.UUID:
     created_case = Case(id=uuid4(), title=case_creation_request.title, description=case_creation_request.description)
     # persist this case to the database in the next exercise (2.2)
     return created_case.id
 
 
 @app.get("/cases/{case_id}")
-async def get_case(case_id: uuid.UUID):
-    return cases_db[case_id]
+async def get_case(case_id: uuid.UUID) -> Case:
+    try:
+        return cases_db[case_id]
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Case not found")
 
 
 @app.get("/cases")
-async def get_cases():
+async def get_cases() -> List[Case]:
     return list(cases_db.values())
