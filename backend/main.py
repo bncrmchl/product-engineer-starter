@@ -1,12 +1,16 @@
+# Standard library imports
 import time
+from typing import List
 from uuid import UUID, uuid4
-from http.client import HTTPException
+
+# Third-party library imports
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from tinydb import TinyDB, Query
+
+# Local application imports
 from entities.case import Case
 from entities.case_creation_request import CaseCreationRequest
-from typing import List
-from tinydb import TinyDB, Query
 
 app = FastAPI()
 
