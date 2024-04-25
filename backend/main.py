@@ -40,7 +40,7 @@ async def create_case(case_creation_request: CaseCreationRequest) -> UUID:
         description=case_creation_request.description,
         created_at=current_timestamp,
         status="submitted")
-    created_case_dict = created_case.dict()
+    created_case_dict = created_case.model_dump()
     created_case_dict['id'] = str(case_uuid)
     try:
         cases_db.insert(created_case_dict)
