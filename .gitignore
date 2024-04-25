@@ -51,3 +51,6 @@ next-env.d.ts
 
 # pycache
 __pycache__
+
+# cases database
+backend/cases_db.json
