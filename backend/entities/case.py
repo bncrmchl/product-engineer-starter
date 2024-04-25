@@ -6,3 +6,5 @@ class Case(BaseModel):
     id: uuid.UUID
     title: str
     description: str
+    created_at: int
+    status: str

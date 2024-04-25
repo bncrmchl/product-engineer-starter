@@ -1,7 +1,7 @@
+import time
 from uuid import UUID, uuid4
 from http.client import HTTPException
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from entities.case import Case
 from entities.case_creation_request import CaseCreationRequest
@@ -21,14 +21,6 @@ app.add_middleware(
 cases_db = TinyDB('cases_db.json')
 
 
-@app.exception_handler(HTTPException)
-async def http_exception_handler(exc: HTTPException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"message": exc.detail},
-    )
-
-
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
@@ -37,15 +29,20 @@ async def root():
 @app.post("/cases", response_model=UUID)
 async def create_case(case_creation_request: CaseCreationRequest) -> UUID:
     case_uuid = uuid4()
-    created_case = Case(id=case_uuid, title=case_creation_request.title, description=case_creation_request.description)
+    current_timestamp = int(time.time())
+    created_case = Case(
+        id=case_uuid,
+        title=case_creation_request.title,
+        description=case_creation_request.description,
+        created_at=current_timestamp,
+        status="submitted")
     created_case_dict = created_case.dict()
     created_case_dict['id'] = str(case_uuid)
     try:
         cases_db.insert(created_case_dict)
-    except Exception as e:
-        print(e)
+    except Exception:
         raise HTTPException(status_code=500, detail="Unable to persist case information")
-    return case_uuid
+    return created_case_dict["id"]
 
 
 @app.get("/cases/{case_id}")
