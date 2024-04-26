@@ -2,6 +2,8 @@ from uuid import UUID
 from typing import List, Optional
 from pydantic import BaseModel
 from entities.step import Step
+
+
 class Case(BaseModel):
     case_id: UUID
     status: str
