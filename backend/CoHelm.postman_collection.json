@@ -1,0 +1,74 @@
+{
+	"info": {
+		"_postman_id": "3047efd9-9112-4832-ac93-095fa06868bc",
+		"name": "CoHelm Coding assessment API call collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "511473"
+	},
+	"item": [
+		{
+			"name": "GET specific case",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8000/cases/7231ea37-366c-4bd7-a800-d3aab52c87bb",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"cases",
+						"7231ea37-366c-4bd7-a800-d3aab52c87bb"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET all cases",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8000/cases",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"cases"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST a case",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"procedure_name\": \"Facet Joint Injection\",\r\n    \"cpt_codes\": [\r\n        \"64490\",\r\n        \"64491\",\r\n        \"64492\",\r\n        \"64493\",\r\n        \"64494\",\r\n        \"64495\"\r\n    ],\r\n    \"summary\": null,\r\n    \"is_met\": false,\r\n    \"is_complete\": false,\r\n    \"steps\": []\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8000/cases",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"cases"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
