@@ -6,7 +6,7 @@ import classNames from "classnames";
 import { FaCheck, FaSpinner } from "react-icons/fa";
 import { SIMULATED_FILE_UPLOAD_DURATION_MILLIS } from 'resources/constants';
 
-function FileUploadButton({ file, setFile, fileUrl, buttonColor, buttonText, isEnabled }) {
+function FileUploadButton({ file, setFile, fileUrl, buttonColor, buttonText, isEnabled, onClickOverride }) {
 	const [loading, setLoading] = useState(false);
 
 	const handleClick = () => {
@@ -27,7 +27,7 @@ function FileUploadButton({ file, setFile, fileUrl, buttonColor, buttonText, isE
 					"text-white font-medium py-2 px-4 rounded border border-2",
 					file === null ? `${isEnabled ? buttonColor : "bg-gray-400"} border-${isEnabled ? buttonColor : "bg-gray-400"}` : "border-transparent text-green-600",
 				)}
-				onClick={handleClick}
+				onClick={onClickOverride ? onClickOverride : handleClick}
 				disabled={loading || !isEnabled}
 			>
 				{loading ? (

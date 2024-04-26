@@ -6,24 +6,57 @@ import { DashboardContext } from "@/context/dashboard-context";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import FileUploadButton from "@/components/generic-file-upload";
+import { SIMULATED_CASE_DATA } from "@/resources/constants";
 
 export default function DashboardRoot() {
 	const router = useRouter();
 	const { guidelinesFile, medicalRecord, setGuidelinesFile, setMedicalRecord } = useContext(DashboardContext);
-	const CASE_ID = "case_891a_6fbl_87d1_4326";
 	const isContinueButtonDisabled = !guidelinesFile || !medicalRecord;
 
-	const handleContinue = () => {
-		router.push(`/dashboard/case/${CASE_ID}`);
-	}
+	const handleContinue = async () => {
 
-	const notify = () => toast.error("Please upload the Medical Record first!");
+        displayNotificationIfNecessary()
+
+        if(guidelinesFile && medicalRecord) {
+            const response = await fetch('http://localhost:8000/cases', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(SIMULATED_CASE_DATA)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create case');
+            }
+
+            const responseData = await response.json();
+            console.log("Response Data:", responseData); // Log to see what you actually received
+            const caseId = responseData;
+
+            if (!caseId) {
+                throw new Error("Case ID was not returned from the server.");
+            }
+
+            router.push(`/dashboard/case/${caseId}`);
+        }
+	};
+
+    const displayNotificationIfNecessary = () => {
+        if (!guidelinesFile && !medicalRecord) {
+            toast.error("Please upload Both Documents to proceed, starting with the medical record.");
+        } else if (guidelinesFile && !medicalRecord) {
+            toast.error("Please upload your medical record to proceed.");
+        } else if (!guidelinesFile && medicalRecord) {
+            toast.error("Please upload your guidelines file to proceed.");
+        }
+    };
 
 	const guidelinesFileUploadButtonProperties = {
 		file: guidelinesFile,
 		setFile: setGuidelinesFile,
 		fileUrl: "/assets/guidelines.pdf",
-		buttonColor: "bg-orange-500",
+		buttonColor: medicalRecord ? "bg-orange-500" : "bg-gray-400",
 		buttonText: "Simulate Guidelines"
 	};
 
@@ -41,26 +74,19 @@ export default function DashboardRoot() {
 		<div className="w-full flex flex-col justify-center items-center h-screen">
 			<div className="w-full flex flex-row gap-2 items-center">
 				<FileUploadButton
-					{...guidelinesFileUploadButtonProperties}
+					{...medicalRecordFileUploadButtonProperties}
 					isEnabled={true}
 				/>
-				{guidelinesFile ? (
-					<FileUploadButton
-						{...medicalRecordFileUploadButtonProperties}
-						isEnabled={true}
-					/>
-				) : (
-					<FileUploadButton
-						{...medicalRecordFileUploadButtonProperties}
-						isEnabled={false}
-					/>
-				)}
+                <FileUploadButton
+                    {...guidelinesFileUploadButtonProperties}
+                    isEnabled={true}
+                    onClickOverride={medicalRecord ? undefined : displayNotificationIfNecessary}
+                />
 			</div>
 			<div className="w-full py-4 flex flex-row justify-center">
 				<button
 					className={`font-medium text-white py-2 px-4 rounded ${isContinueButtonDisabled ? "bg-gray-400" : "bg-green-600"} border-${isContinueButtonDisabled ? "bg-gray-400" : "bg-green-600"} border-2`}
 					onClick={handleContinue}
-					disabled={isContinueButtonDisabled}
 				>
 					{isContinueButtonDisabled ? "Please upload all required files to continue..." : "Continue"}
 				</button>
