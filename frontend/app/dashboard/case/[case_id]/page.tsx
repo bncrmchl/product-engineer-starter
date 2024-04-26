@@ -16,6 +16,7 @@ export default function CasePage() {
     const [error, setError] = useState(null);
     const [openSteps, setOpenSteps] = useState({});
     const [openEvidence, setOpenEvidence] = useState({});
+    const [timeSinceCreated, setTimeSinceCreated] = useState('');
 
     const toggleStep = index => {
         setOpenSteps(prev => ({
@@ -35,27 +36,42 @@ export default function CasePage() {
     };
 
     function formatDuration(seconds) {
-            const days = Math.floor(seconds / (24*60*60));
-            seconds %= 86400;
-            const hours = Math.floor(seconds / (60*60));
-            seconds %= 3600;
-            const minutes = Math.floor(seconds / 60);
-            seconds %= 60;
+        const days = Math.floor(seconds / (24*60*60));
+        seconds %= 86400;
+        const hours = Math.floor(seconds / (60*60));
+        seconds %= 3600;
+        const minutes = Math.floor(seconds / 60);
+        seconds %= 60;
 
-            const parts = [];
-            if (days > 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);
-            if (hours > 0) parts.push(`${hours} hour${hours > 1 ? 's' : ''}`);
-            if (minutes > 0) parts.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
-            if (seconds > 0 || parts.length === 0) parts.push(`${seconds} second${seconds > 1 ? 's' : ''}`);
+        const parts = [];
+        if (days > 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);
+        if (hours > 0) parts.push(`${hours} hour${hours > 1 ? 's' : ''}`);
+        if (minutes > 0) parts.push(`${minutes} minute${minutes > 1 ? 's' : ''}`);
+        if ((seconds > 0 && parts.length === 0)) parts.push(`${seconds} second${seconds > 1 ? 's' : ''}`);
 
-            return parts.join(', ');
+        return parts.join(', ');
+    };
+
+    function updateTimeSinceCreated() {
+        if (caseData && caseData.created_at) {
+            const now = new Date();
+            const createdTime = new Date(caseData.created_at * 1000); // Assuming created_at is a Unix timestamp in seconds
+            const seconds = Math.floor((now - createdTime) / 1000);
+            setTimeSinceCreated(formatDuration(seconds));
         }
+    }
 
+    // This effect will reload the page every 5 seconds until the summary and steps taken have loaded
     useEffect(() => {
+        let intervalId;
+
         async function fetchCaseData(case_id) {
+            setLoading(true);
             try {
                 const response = await fetch(`http://localhost:8000/cases/${case_id}`);
-                if (!response.ok) throw new Error(`Failed to fetch case data: ${response.statusText}`);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch case data: ${response.statusText}`);
+                }
                 const data = await response.json();
                 setCaseData(data);
                 setSummaryLoading(!data.summary);
@@ -64,14 +80,27 @@ export default function CasePage() {
             } catch (error) {
                 console.error("Failed to fetch case data:", error);
                 setError(error.message);
-                setLoading(false);
+            } finally {
+                if (!summaryLoading && !stepsLoading) {
+                    clearInterval(intervalId);
+                }
             }
         }
 
         if (case_id) {
             fetchCaseData(case_id);
+            intervalId = setInterval(() => fetchCaseData(case_id), 5000);
         }
-    }, [case_id]);
+        return () => clearInterval(intervalId);
+    }, [case_id, summaryLoading, stepsLoading]);
+
+
+    // This effect will update the "Time Since Created" value once every second
+    useEffect(() => {
+        const interval = setInterval(updateTimeSinceCreated, 1000);
+        updateTimeSinceCreated();
+        return () => clearInterval(interval);
+    }, [caseData]);
 
     return (
         <div className="case-container">
