@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from entities.step import Step
 
 
+# A case represents one insurance claim to be assessed
 class Case(BaseModel):
     case_id: UUID
     status: str
