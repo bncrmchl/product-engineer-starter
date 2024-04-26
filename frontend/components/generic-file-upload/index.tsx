@@ -28,7 +28,7 @@ function FileUploadButton({ file, setFile, fileUrl, buttonColor, buttonText, isE
 					file === null ? `${isEnabled ? buttonColor : "bg-gray-400"} border-${isEnabled ? buttonColor : "bg-gray-400"}` : "border-transparent text-green-600",
 				)}
 				onClick={onClickOverride ? onClickOverride : handleClick}
-				disabled={loading || !isEnabled}
+				disabled={loading || !isEnabled || file !== null}
 			>
 				{loading ? (
 					<div className="flex flex-row gap-1 items-center">
@@ -40,7 +40,7 @@ function FileUploadButton({ file, setFile, fileUrl, buttonColor, buttonText, isE
 				) : (
 					<span className="text-green-600 flex flex-row gap-1 items-center">
 						<FaCheck />
-						<span>{buttonText} Uploaded</span>
+						<span>File Uploaded</span>
 					</span>
 				)}
 			</button>
