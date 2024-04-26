@@ -33,3 +33,33 @@
       height: 0;
     }
   }
+
+.case-container {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: #f9f9f9;
+}
+
+.case-container h3 {
+    color: #333;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+    font-size: larger;
+    font-weight: bold;
+}
+
+.case-container p {
+    margin: 10px 0;
+    line-height: 1.5;
+}
+
+.case-container ul {
+    list-style: none;
+    padding: 0;
+}
+
+.case-container li {
+    padding: 5px 0;
+}
