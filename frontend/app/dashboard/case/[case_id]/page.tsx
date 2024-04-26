@@ -5,7 +5,18 @@ import { usePathname } from "next/navigation";
 import { FaCheck, FaTimes, FaSpinner, FaAngleDown, FaAngleRight, FaPlus, FaMinus } from "react-icons/fa";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import {
+    API_HOST,
+    CASE_DATA_REFRESH_INTERVAL_MILLIS,
+    TIME_UPDATE_INTERVAL_MILLIS,
+    SECONDS_PER_DAY,
+    SECONDS_PER_HOUR,
+    SECONDS_PER_MINUTE,
+    UNIX_TIMESTAMP_MULTIPLIER,
+    CASE_DATA_REFRESH_TIMEOUT_LIMIT_MILLIS
+} from "@/resources/constants";
 
+// This page shows the detailed view for one Case
 export default function CasePage() {
 
     // Extract the case_id from the URL path, accounting for trailing slashes
@@ -21,16 +32,7 @@ export default function CasePage() {
     const [openEvidence, setOpenEvidence] = useState({});
     const [timeSinceCreated, setTimeSinceCreated] = useState('');
 
-    // Set up constant values
-    const CASE_DATA_REFRESH_INTERVAL_MILLIS = 5000;
-    const TIME_UPDATE_INTERVAL_MILLIS = 1000;
-    const SECONDS_PER_DAY = 86400;
-    const SECONDS_PER_HOUR = 3600;
-    const SECONDS_PER_MINUTE = 60;
-    const UNIX_TIMESTAMP_MULTIPLIER = 1000;
-    const CASE_DATA_REFRESH_TIMEOUT_LIMIT_MILLIS = 60000;
-
-
+    // This function helps us toggle the collapsible Step sections open or closed
     const toggleStep = index => {
         setOpenSteps(prev => ({
             ...prev,
@@ -38,6 +40,7 @@ export default function CasePage() {
         }));
     };
 
+    // This function helps us toggle the collapsible Evidence sections open or closed
     const toggleEvidence = (stepIndex, evidenceIndex) => {
         setOpenEvidence(prev => ({
             ...prev,
@@ -48,6 +51,7 @@ export default function CasePage() {
         }));
     };
 
+    // This function converts seconds into a human readable format with days hours and minutes
     function formatDuration(seconds) {
         const days = Math.floor(seconds / SECONDS_PER_DAY);
         seconds %= SECONDS_PER_DAY;
@@ -65,6 +69,7 @@ export default function CasePage() {
         return parts.join(', ');
     };
 
+    // This function updates the Time Since Created information on the page, so that the time actually increments as you're on the page
     function updateTimeSinceCreated() {
         if (caseData && caseData.created_at) {
             const now = new Date();
@@ -79,10 +84,11 @@ export default function CasePage() {
         let intervalId = null;
         let timeoutId = null;
 
+        // Fetch the case data, and update fields that may not populate right away when a record is made
         async function fetchCaseData(case_id) {
             setLoading(true);
             try {
-                const response = await fetch(`http://localhost:8000/cases/${case_id}`);
+                const response = await fetch(`${API_HOST}/cases/${case_id}`);
                 if (!response.ok) throw new Error(`Failed to fetch case data: ${response.statusText}`);
                 const data = await response.json();
                 setCaseData(data);
@@ -100,10 +106,12 @@ export default function CasePage() {
             }
         }
 
+        // Refresh at a regular interval
         intervalId = setInterval(() => {
             fetchCaseData(case_id);
         }, CASE_DATA_REFRESH_INTERVAL_MILLIS);
 
+        // stop refreshing after 60 seconds
         timeoutId = setTimeout(() => {
             if (loading) {
                 clearInterval(intervalId);
@@ -117,7 +125,8 @@ export default function CasePage() {
             }
         }, CASE_DATA_REFRESH_TIMEOUT_LIMIT_MILLIS);
 
-        fetchCaseData(case_id); // Initial fetch
+        // Initial fetch
+        fetchCaseData(case_id);
 
         return () => {
             clearInterval(intervalId);
@@ -133,6 +142,7 @@ export default function CasePage() {
         return () => clearInterval(interval);
     }, [caseData]);
 
+    // The page structure
     return (
         <div className="case-container">
             {loading ? (

@@ -6,19 +6,23 @@ import { DashboardContext } from "@/context/dashboard-context";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import FileUploadButton from "@/components/generic-file-upload";
-import { SIMULATED_CASE_DATA } from "@/resources/constants";
+import { API_HOST, SIMULATED_CASE_DATA } from "@/resources/constants";
 
+// This page allows the user to upload their case documents and submit them for processing
 export default function DashboardRoot() {
 	const router = useRouter();
 	const { guidelinesFile, medicalRecord, setGuidelinesFile, setMedicalRecord } = useContext(DashboardContext);
 	const isContinueButtonDisabled = !guidelinesFile || !medicalRecord;
 
+    // This function handles submitting the case data and loads the case detail view
 	const handleContinue = async () => {
 
+        // Display a toast error message if both documents haven't been uploaded
         displayNotificationIfNecessary()
 
+        // If both files are present, POST to create a new Case, then load the case detail view
         if(guidelinesFile && medicalRecord) {
-            const response = await fetch('http://localhost:8000/cases', {
+            const response = await fetch(`${API_HOST}/cases`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -31,7 +35,6 @@ export default function DashboardRoot() {
             }
 
             const responseData = await response.json();
-            console.log("Response Data:", responseData); // Log to see what you actually received
             const caseId = responseData;
 
             if (!caseId) {
@@ -42,6 +45,7 @@ export default function DashboardRoot() {
         }
 	};
 
+    // This function displays an appropriate error notification depending on which files have been uplaoded
     const displayNotificationIfNecessary = () => {
         if (!guidelinesFile && !medicalRecord) {
             toast.error("Please upload Both Documents to proceed, starting with the medical record.");
@@ -52,6 +56,7 @@ export default function DashboardRoot() {
         }
     };
 
+    // The properties to use for the file upload buttons
 	const guidelinesFileUploadButtonProperties = {
 		file: guidelinesFile,
 		setFile: setGuidelinesFile,
@@ -59,7 +64,6 @@ export default function DashboardRoot() {
 		buttonColor: medicalRecord ? "bg-orange-500" : "bg-gray-400",
 		buttonText: "Simulate Guidelines"
 	};
-
 	const medicalRecordFileUploadButtonProperties = {
 		file: medicalRecord,
 		setFile: setMedicalRecord,
@@ -68,6 +72,7 @@ export default function DashboardRoot() {
 		buttonText: "Simulate Medical Record"
 	};
 
+    // The page structure
 	return (
 		<>
 		<ToastContainer />

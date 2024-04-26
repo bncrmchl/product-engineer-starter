@@ -6,6 +6,7 @@ import classNames from "classnames";
 import { FaCheck, FaSpinner } from "react-icons/fa";
 import { SIMULATED_FILE_UPLOAD_DURATION_MILLIS } from 'resources/constants';
 
+// A generic file upload button that simulates a 3 second long file upload
 function FileUploadButton({ file, setFile, fileUrl, buttonColor, buttonText, isEnabled, onClickOverride }) {
 	const [loading, setLoading] = useState(false);
 
