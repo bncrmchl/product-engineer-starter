@@ -79,3 +79,66 @@
 .option-text {
     display: inline-block;
 }
+
+.evidence-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    background-color: #f0f0f0;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.evidence-list {
+    margin-top: 5px;
+    padding-left: 20px;
+}
+
+.evidence-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.evidence-table td {
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.page-number {
+    white-space: nowrap;
+    font-size: 0.8em;
+    font-weight: bold;
+    padding: 3px;
+    background-color: #bbb;
+    color: #555;
+    border-radius: 5px;
+    text-align: center;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+/* Stripe every other row */
+.evidence-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.evidence-table tr:nth-child(odd) {
+    background-color: #e9e9e9;
+}
+
+.page-number-container {
+    display: flex;           /* Enables the use of flexbox utilities */
+    align-items: center;     /* Vertically centers the content within the cell */
+    justify-content: center; /* Horizontally centers the content within its container */
+    font-size: 0.8em;
+    font-weight: bold;
+    padding: 3px;
+    background-color: #bbb;
+    color: #555;
+    border-radius: 5px;
+    text-align: center;
+    margin-right: 10px;      /* Maintains spacing between this text and any other elements in the cell */
+    min-width: 50px;         /* Ensures the container does not become too narrow */
+}
