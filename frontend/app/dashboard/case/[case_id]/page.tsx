@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from "next/navigation";
 import { FaCheck, FaTimes, FaSpinner, FaAngleDown, FaAngleRight, FaPlus, FaMinus } from "react-icons/fa";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function CasePage() {
 
@@ -26,6 +28,7 @@ export default function CasePage() {
     const SECONDS_PER_HOUR = 3600;
     const SECONDS_PER_MINUTE = 60;
     const UNIX_TIMESTAMP_MULTIPLIER = 1000;
+    const CASE_DATA_REFRESH_TIMEOUT_LIMIT_MILLIS = 60000;
 
 
     const toggleStep = index => {
@@ -73,15 +76,14 @@ export default function CasePage() {
 
     // This effect will reload the page every 5 seconds until the summary and steps taken have loaded
     useEffect(() => {
-        let intervalId;
+        let intervalId = null;
+        let timeoutId = null;
 
         async function fetchCaseData(case_id) {
             setLoading(true);
             try {
                 const response = await fetch(`http://localhost:8000/cases/${case_id}`);
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch case data: ${response.statusText}`);
-                }
+                if (!response.ok) throw new Error(`Failed to fetch case data: ${response.statusText}`);
                 const data = await response.json();
                 setCaseData(data);
                 setSummaryLoading(!data.summary);
@@ -93,15 +95,34 @@ export default function CasePage() {
             } finally {
                 if (!summaryLoading && !stepsLoading) {
                     clearInterval(intervalId);
+                    clearTimeout(timeoutId);
                 }
             }
         }
 
-        if (case_id) {
+        intervalId = setInterval(() => {
             fetchCaseData(case_id);
-            intervalId = setInterval(() => fetchCaseData(case_id), CASE_DATA_REFRESH_INTERVAL_MILLIS);
-        }
-        return () => clearInterval(intervalId);
+        }, CASE_DATA_REFRESH_INTERVAL_MILLIS);
+
+        timeoutId = setTimeout(() => {
+            if (loading) {
+                clearInterval(intervalId);
+                toast.error("Sorry, but this case record is taking longer than expected to process. Please wait a few minutes and refresh the page. If the problem persists, contact support.", {
+                    position: "top-center",
+                    autoClose: false,
+                    closeOnClick: false,
+                    pauseOnHover: false,
+                    draggable: false,
+                });
+            }
+        }, CASE_DATA_REFRESH_TIMEOUT_LIMIT_MILLIS);
+
+        fetchCaseData(case_id); // Initial fetch
+
+        return () => {
+            clearInterval(intervalId);
+            clearTimeout(timeoutId);
+        };
     }, [case_id, summaryLoading, stepsLoading]);
 
 
@@ -190,6 +211,7 @@ export default function CasePage() {
             ) : (
                 <p>Case data not available or not loaded yet.</p>
             )}
+            <ToastContainer />
         </div>
     );
 }
