@@ -1,10 +1,14 @@
+from uuid import UUID
+from typing import List, Optional
 from pydantic import BaseModel
-import uuid
-
-
+from entities.step import Step
 class Case(BaseModel):
-    id: uuid.UUID
-    title: str
-    description: str
-    created_at: int
+    case_id: UUID
     status: str
+    created_at: int
+    procedure_name: str
+    cpt_codes: List[str]
+    summary: Optional[str]
+    is_met: bool
+    is_complete: bool
+    steps: List[Step]

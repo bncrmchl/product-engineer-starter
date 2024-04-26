@@ -1,4 +1,5 @@
 # Standard library imports
+import threading
 import time
 from typing import List
 from uuid import UUID, uuid4
@@ -11,6 +12,7 @@ from tinydb import TinyDB, Query
 # Local application imports
 from entities.case import Case
 from entities.case_creation_request import CaseCreationRequest
+from process_simulator.backend_process_simulator import simulate_backend_process
 
 app = FastAPI()
 
@@ -35,24 +37,29 @@ async def create_case(case_creation_request: CaseCreationRequest) -> UUID:
     case_uuid = uuid4()
     current_timestamp = int(time.time())
     created_case = Case(
-        id=case_uuid,
-        title=case_creation_request.title,
-        description=case_creation_request.description,
+        case_id=case_uuid,
         created_at=current_timestamp,
-        status="submitted")
+        status="submitted",
+        **case_creation_request.model_dump()
+    )
+
     created_case_dict = created_case.model_dump()
-    created_case_dict['id'] = str(case_uuid)
+    created_case_dict['case_id'] = str(case_uuid)
+
+    print(created_case_dict)
+
     try:
         cases_db.insert(created_case_dict)
+        threading.Thread(target=simulate_backend_process, args=(case_uuid, cases_db)).start()
     except Exception:
         raise HTTPException(status_code=500, detail="Unable to persist case information")
-    return created_case_dict["id"]
+    return created_case_dict['case_id']
 
 
 @app.get("/cases/{case_id}")
 async def get_case(case_id: UUID) -> Case:
     case_query = Query()
-    result = cases_db.search(case_query.id == str(case_id))
+    result = cases_db.search(case_query.case_id == str(case_id))
     if result:
         return result[0]
     raise HTTPException(status_code=404, detail="Case not found")
