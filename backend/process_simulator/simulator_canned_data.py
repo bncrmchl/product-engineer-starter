@@ -1,5 +1,4 @@
 # This file contains the raw data to use for the process simulator. The data is fairly verbose so we'll stash it here.
-# It would probably be better to read from the response-n.json files instead, set that up later.
 
 
 first_update = {
