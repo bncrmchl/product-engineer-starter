@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from "next/navigation";
-import { FaCheck, FaSpinner } from "react-icons/fa";
+import { FaCheck, FaTimes, FaSpinner, FaAngleDown, FaAngleRight } from "react-icons/fa";
 
 export default function CasePage() {
     const pathname = usePathname();
@@ -14,6 +14,7 @@ export default function CasePage() {
     const [stepsLoading, setStepsLoading] = useState(true);
     const [caseData, setCaseData] = useState(null);
     const [error, setError] = useState(null);
+    const [openSteps, setOpenSteps] = useState({});
 
     function formatDuration(seconds) {
         const days = Math.floor(seconds / (24*60*60));
@@ -31,6 +32,13 @@ export default function CasePage() {
 
         return parts.join(', ');
     }
+
+    const toggleStep = index => {
+        setOpenSteps(prev => ({
+            ...prev,
+            [index]: !prev[index]
+        }));
+    };
 
     useEffect(() => {
         let intervalId;
@@ -82,13 +90,35 @@ export default function CasePage() {
                     <p><strong>Time Since Created:</strong> {caseData.created_at ? `${formatDuration(Math.floor((new Date() - new Date(caseData.created_at * 1000)) / 1000))} ago` : "Time unavailable"}</p>
                     <div>
                         <strong>Steps Taken:</strong>
-                        <span>{stepsLoading ? <FaSpinner className="animate-spin" /> : (
-                            <ul>
+                        {stepsLoading ? <FaSpinner className="animate-spin" /> : (
+                            <div>
                                 {caseData.steps.map((step, index) => (
-                                    <li key={index}>{step.question}</li>
+                                    <div key={index} className="step-section">
+                                        <button onClick={() => toggleStep(index)} className="collapse-toggle">
+                                            {step.question}
+                                            {openSteps[index] ? <FaAngleDown /> : <FaAngleRight />}
+                                        </button>
+                                        {openSteps[index] && (
+                                            <div className="collapse-content">
+                                                <ul>
+                                                    {step.options.map((option, optIndex) => (
+                                                        <li key={optIndex} className="option-item">
+                                                            {option.selected ? (
+                                                                <FaCheck className="icon-check" />
+                                                            ) : (
+                                                                <FaTimes className="icon-times" />
+                                                            )}
+                                                            <span className="option-text">{option.text}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                                <p>{step.reasoning}</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 ))}
-                            </ul>
-                        )}</span>
+                            </div>
+                        )}
                     </div>
                     <p><strong>Final Determination:</strong> {caseData.is_met ? 'Met' : 'Not Met'}</p>
                 </div>
