@@ -81,7 +81,20 @@ export default function CasePage() {
                 <p>Error: {error}</p>
             ) : caseData ? (
                 <div>
-                    <h3>Case Details</h3>
+                    <div className="header-container">
+                        <h3>Case Details</h3>
+                        <div>
+                            <strong>Final Determination:</strong> <span className="final-determination" style={{ color: caseData.is_met ? 'green' : 'red' }}>{caseData.is_met ? 'Met' : 'Not Met'}</span>
+                        </div>
+                    </div>
+                    <div className="subheader-container">
+                        <p>Question number sequence: {
+                            caseData.steps.map(step => step.next_step).join(", ")
+                        }</p>
+                        <p>Status: {
+                            caseData.status
+                        }</p>
+                    </div>
                     <p><strong>Procedure Name:</strong> {caseData.procedure_name || "Not specified"}</p>
                     <p><strong>CPT Codes:</strong> {caseData.cpt_codes ? caseData.cpt_codes.join(', ') : "Not provided"}</p>
                     <div><strong>Summary:</strong> {summaryLoading ? <FaSpinner className="animate-spin" /> : caseData.summary || "No summary available."}</div>
@@ -134,7 +147,6 @@ export default function CasePage() {
                             </div>
                         )}
                     </div>
-                    <p><strong>Final Determination:</strong> {caseData.is_met ? 'Met' : 'Not Met'}</p>
                 </div>
             ) : (
                 <p>Case data not available or not loaded yet.</p>

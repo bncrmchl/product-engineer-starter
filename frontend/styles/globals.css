@@ -16,7 +16,6 @@
 
 .case-container h3 {
     color: #333;
-    border-bottom: 1px solid #ccc;
     padding-bottom: 10px;
     font-size: larger;
     font-weight: bold;
@@ -129,9 +128,9 @@
 }
 
 .page-number-container {
-    display: flex;           /* Enables the use of flexbox utilities */
-    align-items: center;     /* Vertically centers the content within the cell */
-    justify-content: center; /* Horizontally centers the content within its container */
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 0.8em;
     font-weight: bold;
     padding: 3px;
@@ -139,6 +138,27 @@
     color: #555;
     border-radius: 5px;
     text-align: center;
-    margin-right: 10px;      /* Maintains spacing between this text and any other elements in the cell */
-    min-width: 50px;         /* Ensures the container does not become too narrow */
+    margin-right: 10px;
+    min-width: 50px;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0px;
+    font-size: larger;
+}
+
+.final-determination {
+    font-weight: bold;
+}
+
+.subheader-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+    font-size: smaller;
 }
