@@ -5,10 +5,11 @@ import { usePathname } from "next/navigation";
 import { FaCheck, FaTimes, FaSpinner, FaAngleDown, FaAngleRight, FaPlus, FaMinus } from "react-icons/fa";
 
 export default function CasePage() {
-    const pathname = usePathname();
-    const pathParts = pathname.split('/').filter(part => part !== '');
-    const case_id = pathParts.pop();
 
+    // Extract the case_id from the URL path, accounting for trailing slashes
+    const case_id = usePathname().split('/').filter(part => part !== '').pop()
+
+    // Set up states
     const [loading, setLoading] = useState(true);
     const [summaryLoading, setSummaryLoading] = useState(true);
     const [stepsLoading, setStepsLoading] = useState(true);
@@ -17,6 +18,15 @@ export default function CasePage() {
     const [openSteps, setOpenSteps] = useState({});
     const [openEvidence, setOpenEvidence] = useState({});
     const [timeSinceCreated, setTimeSinceCreated] = useState('');
+
+    // Set up constant values
+    const CASE_DATA_REFRESH_INTERVAL_MILLIS = 5000;
+    const TIME_UPDATE_INTERVAL_MILLIS = 1000;
+    const SECONDS_PER_DAY = 86400;
+    const SECONDS_PER_HOUR = 3600;
+    const SECONDS_PER_MINUTE = 60;
+    const UNIX_TIMESTAMP_MULTIPLIER = 1000;
+
 
     const toggleStep = index => {
         setOpenSteps(prev => ({
@@ -36,12 +46,12 @@ export default function CasePage() {
     };
 
     function formatDuration(seconds) {
-        const days = Math.floor(seconds / (24*60*60));
-        seconds %= 86400;
-        const hours = Math.floor(seconds / (60*60));
-        seconds %= 3600;
-        const minutes = Math.floor(seconds / 60);
-        seconds %= 60;
+        const days = Math.floor(seconds / SECONDS_PER_DAY);
+        seconds %= SECONDS_PER_DAY;
+        const hours = Math.floor(seconds / SECONDS_PER_HOUR);
+        seconds %= SECONDS_PER_HOUR;
+        const minutes = Math.floor(seconds / SECONDS_PER_MINUTE);
+        seconds %= SECONDS_PER_MINUTE;
 
         const parts = [];
         if (days > 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);
@@ -55,8 +65,8 @@ export default function CasePage() {
     function updateTimeSinceCreated() {
         if (caseData && caseData.created_at) {
             const now = new Date();
-            const createdTime = new Date(caseData.created_at * 1000); // Assuming created_at is a Unix timestamp in seconds
-            const seconds = Math.floor((now - createdTime) / 1000);
+            const createdTime = new Date(caseData.created_at * UNIX_TIMESTAMP_MULTIPLIER); // Assuming created_at is a Unix timestamp in seconds
+            const seconds = Math.floor((now - createdTime) / UNIX_TIMESTAMP_MULTIPLIER);
             setTimeSinceCreated(formatDuration(seconds));
         }
     }
@@ -89,7 +99,7 @@ export default function CasePage() {
 
         if (case_id) {
             fetchCaseData(case_id);
-            intervalId = setInterval(() => fetchCaseData(case_id), 5000);
+            intervalId = setInterval(() => fetchCaseData(case_id), CASE_DATA_REFRESH_INTERVAL_MILLIS);
         }
         return () => clearInterval(intervalId);
     }, [case_id, summaryLoading, stepsLoading]);
@@ -97,7 +107,7 @@ export default function CasePage() {
 
     // This effect will update the "Time Since Created" value once every second
     useEffect(() => {
-        const interval = setInterval(updateTimeSinceCreated, 1000);
+        const interval = setInterval(updateTimeSinceCreated, UNIX_TIMESTAMP_MULTIPLIER);
         updateTimeSinceCreated();
         return () => clearInterval(interval);
     }, [caseData]);
@@ -127,7 +137,7 @@ export default function CasePage() {
                     <p><strong>Procedure Name:</strong> {caseData.procedure_name || "Not specified"}</p>
                     <p><strong>CPT Codes:</strong> {caseData.cpt_codes ? caseData.cpt_codes.join(', ') : "Not provided"}</p>
                     <div><strong>Summary:</strong> {summaryLoading ? <FaSpinner className="animate-spin" /> : caseData.summary || "No summary available."}</div>
-                    <p><strong>Time Since Created:</strong> {caseData.created_at ? formatDuration(Math.floor((new Date() - new Date(caseData.created_at * 1000)) / 1000)) + " ago" : "Time unavailable"}</p>
+                    <p><strong>Time Since Created:</strong> {caseData.created_at ? formatDuration(Math.floor((new Date() - new Date(caseData.created_at * UNIX_TIMESTAMP_MULTIPLIER)) / UNIX_TIMESTAMP_MULTIPLIER)) + " ago" : "Time unavailable"}</p>
                     <div>
                         <strong>Steps Taken:</strong>
                         {stepsLoading ? <FaSpinner className="animate-spin" /> : (
